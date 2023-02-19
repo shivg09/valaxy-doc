@@ -1,0 +1,29 @@
+https://www.youtube.com/watch?v=nE4b9mW2ym0&t=184s
+
+1.  create user in tomcat.conf.xml file
+    user name deploy password  and mananger-role manager-script
+    add this user in jenkins- manage-jenkins-manage-user
+    ========================
+Project deployment using ANSIBLE
+publicsh ovwerssho me ansible user details put karna hai
+Enable password less authentication between ansible to tomcat
+adduser in ansible and tomcat both server
+username- ansadmin
+password -ansadmin
+and visudo assign NOPASSWD
+copy sshkey to tomcat server from ansible server
+in jenkins publish ower ssh me ansible ip address username and passord assign
+post-step
+transfer source  path =  
+src= webapp/target/*.war
+remote path=  //opt/playbook
+========================================
+/opt/playbook/copyfile.yml
+---
+- hosts: webserver
+  become: true
+  tasks:
+    - name: war copy on tomcat
+      copy:
+        src: /opt/playbook/webapp/target
+        dest: /opt/tomcat:8.34/webapps
