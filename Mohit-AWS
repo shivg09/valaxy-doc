@@ -1,0 +1,305 @@
+
+
+
+mkdir -p /etc/rancher/rke2/
+
+
+
+vim /etc/rancher/rke2/config.yaml
+
+
+
+token: K10586efbfd9cac9bd86cf0da81934b61b41eb0f47aa032f9a8fa889b9be3cbe0c7::server:QuDfyW3Ig17LtTE2xpfrnSreb
+server: https://pifdemo-cluster.eksdemo.tk:9345
+tls-san:
+  - pifdemo-cluster.eksdemo.tk
+  - pif-demo-cluster-rke-lb-be3c97e9802da380.elb.eu-west-2.amazonaws.com
+
+
+
+token: QuDfyW3Ig17LtTE2xpfrnSreb
+tls-san:
+  - pifdemo-cluster.eksdemo.tk
+  - pif-demo-cluster-rke-lb-be3c97e9802da380.elb.eu-west-2.amazonaws.com
+
+
+
+
+
+curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=latest sh -
+systemctl enable rke2-server.service
+systemctl start rke2-server.service
+systemctl stop rke2-server.service
+
+
+
+_________________________________________
+Join agent or worker node
+_________________________________________
+
+
+sudo su
+
+apt update
+
+curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=latest INSTALL_RKE2_TYPE="agent" sh -
+
+
+systemctl enable rke2-agent.service
+
+
+mkdir -p /etc/rancher/rke2/
+vim /etc/rancher/rke2/config.yaml
+
+
+server: https://pifdemo-cluster.eksdemo.tk:9345
+token: K10586efbfd9cac9bd86cf0da81934b61b41eb0f47aa032f9a8fa889b9be3cbe0c7::server:QuDfyW3Ig17LtTE2xpfrnSreb
+
+
+#cloud-boothook
+#!/bin/bash
+sudo su
+apt update
+curl -sfL https://get.rke2.io | INSTALL_RKE2_CHANNEL=latest INSTALL_RKE2_TYPE="agent" sh -
+systemctl enable rke2-agent.service
+mkdir -p /etc/rancher/rke2/
+touch /etc/rancher/rke2/config.yaml
+echo "server: https://pifdemo-cluster.eksdemo.tk:9345" > /etc/rancher/rke2/config.yaml
+echo "token: K10586efbfd9cac9bd86cf0da81934b61b41eb0f47aa032f9a8fa889b9be3cbe0c7::server:QuDfyW3Ig17LtTE2xpfrnSreb" >> /etc/rancher/rke2/config.yaml
+systemctl start rke2-agent.service
+
+systemctl status rke2-agent.service
+systemctl start rke2-agent.service
+systemctl restart rke2-agent.service
+
+journalctl -u rke2-agent -f
+
+
+
+helm repo add rancher-stable https://releases.rancher.com/server-charts/stable
+
+
+helm upgrade -i \
+  cert-manager jetstack/cert-manager \
+  --namespace cert-manager \
+  --create-namespace \
+  --version v1.9.1 \
+  --set installCRDs=true
+
+
+helm upgrade -i rancher rancher-stable/rancher --create-namespace --namespace cattle-system --set hostname=pifdemo-cluster.eksdemo.tk --set bootstrapPassword=bootStrapAllTheThings --set replicas=1
+
+helm upgrade -i rancher rancher-stable/rancher --create-namespace --namespace cattle-system --set hostname=pifdemo-cluster.eksdemo.tk --set replicas=1
+
+
+
+=================================================================
+
+rancher using terraform
+
+
+rancher_node_ip = "13.40.26.50"
+rancher_server_url = "https://rancher.13.40.26.50.sslip.io"
+
+
+rancher password = cac9bd86cf0da8193
+
+
+frog master key = 69167d73fb3aa40be4760f879c764dd6fcd99f21b593acecd9a93c46ac15e0db
+
+
+
+Jenkins server
+-----------------
+
+kubectl --namespace default port-forward svc/jenkins 8080:8080
+
+Jenkins Username = 73jenkinsadmin
+Jenkins password = nSQUn831XvR6rwPVLs5Z8z
+
+
+PostgreSQL Server 
+-----------------
+
+NAME: postgresql
+LAST DEPLOYED: Thu Mar 9 09:04:58 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: postgresql-ha
+CHART VERSION: 11.1.4
+APP VERSION: 15.2.0
+** Please be patient while the chart is being deployed **
+
+PostgreSQL can be accessed through Pgpool via port 5432 on the following DNS name from within your cluster:
+
+postgresql-postgresql-ha-pgpool.default.svc.cluster.local
+
+Pgpool acts as a load balancer for PostgreSQL and forward read/write connections to the primary node while read-only connections are forwarded to standby nodes.
+
+To get the password for "postgres" run:
+export POSTGRES_PASSWORD=$(kubectl get secret --namespace default postgresql-postgresql-ha-postgresql -o jsonpath="{.data.password}" | base64 -d)
+
+To get the password for "repmgr" run:
+export REPMGR_PASSWORD=$(kubectl get secret --namespace default postgresql-postgresql-ha-postgresql -o jsonpath="{.data.repmgr-password}" | base64 -d)
+
+To connect to your database run the following command:
+
+kubectl run postgresql-postgresql-ha-client --rm --tty -i --restart='Never' --namespace default --image docker.io/bitnami/postgresql-repmgr:15.2.0-debian-11-r5 --env="PGPASSWORD=$POSTGRES_PASSWORD" \
+--command -- psql -h postgresql-postgresql-ha-pgpool -p 5432 -U postgres -d postgres
+
+To connect to your database from outside the cluster execute the following commands:
+
+kubectl port-forward --namespace default svc/postgresql-postgresql-ha-pgpool 5432:5432
+
+psql -h 127.0.0.1 -p 5432 -U postgres -d postgres
+
+
+
+
+password = oCHk9gRM6j
+
+
+
+
+Mysql Setup
+=================================================================
+
+NAME: mysql
+LAST DEPLOYED: Thu Mar 9 12:40:46 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: mysql
+CHART VERSION: 9.5.1
+APP VERSION: 8.0.32
+** Please be patient while the chart is being deployed **
+Tip:
+Watch the deployment status using the command: kubectl get pods -w --namespace default
+Services:
+echo Primary: mysql-primary.default.svc.cluster.local:3306
+echo Secondary: mysql-secondary.default.svc.cluster.local:3306
+Execute the following to get the administrator credentials:
+echo Username: root
+
+MYSQL_ROOT_PASSWORD=$(kubectl get secret --namespace default mysql -o jsonpath="{.data.mysql-root-password}" | base64 -d)
+
+To connect to your database:
+1. Run a pod that you can use as a client:
+kubectl run mysql-client --rm --tty -i --restart='Never' --image docker.io/bitnami/mysql:8.0.32-debian-11-r11 --namespace default --env MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD --command -- bash
+
+2. To connect to primary service (read/write):
+mysql -h mysql-primary.default.svc.cluster.local -uroot -p"$MYSQL_ROOT_PASSWORD"
+
+3. To connect to secondary service (read-only):
+mysql -h mysql-secondary.default.svc.cluster.local -uroot -p"$MYSQL_ROOT_PASSWORD"
+
+
+root password = vxV3kyOClJ
+
+
+
+Kong Gateway
+----------------
+  KONG_DATABASE: kong
+  KONG_PG_HOST: postgresql-postgresql-ha-pgpool
+  KONG_PG_USER: postgres
+  KONG_PG_PASSWORD: oCHk9gRM6j
+
+Kong admin URL = kong-kong-admin.default.svc.cluster.local
+
+NAME: kong
+LAST DEPLOYED: Thu Mar 9 21:16:17 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+To connect to Kong, please execute the following commands:
+HOST=$(kubectl get svc --namespace default kong-kong-proxy -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+PORT=$(kubectl get svc --namespace default kong-kong-proxy -o jsonpath='{.spec.ports[0].port}')
+export PROXY_IP=${HOST}:${PORT}
+curl $PROXY_IP
+Once installed, please follow along the getting started guide to start using
+Kong: https://docs.konghq.com/kubernetes-ingress-controller/latest/guides/getting-started/
+
+
+port: 1337
+node_env: production
+db_adapter: postgres
+db_host: postgresql-postgresql-ha-pgpool
+db_port: 5432
+db_user: postgres
+db_password: oCHk9gRM6j
+db_database: konga
+runMigrations: true
+
+
+
+
+
+elasticsearch Server
+-----------------------------
+
+NAME: elasticsearch
+LAST DEPLOYED: Thu Mar 9 19:54:34 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Watch all cluster members come up.
+$ kubectl get pods --namespace=default -l app=elasticsearch-master -w
+
+2. Retrieve elastic user's password.
+$ kubectl get secrets --namespace=default elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
+
+3. Test cluster health using Helm test.
+$ helm --namespace=default test elasticsearch
+
+elasticsearch-master.default.svc.cluster.local
+
+elastic password = CT1TFGJsaW7hy672
+
+http://a5330af8b08d745d4bb22b64ebf204cd-1201642594.eu-west-2.elb.amazonaws.com:5601/
+
+http://kibana.eksdemo.tk:5601
+
+
+Redis Server
+---------------
+
+NAME: redis
+LAST DEPLOYED: Sat Mar 11 13:58:02 2023
+NAMESPACE: default
+STATUS: deployed
+REVISION: 1
+TEST SUITE: None
+NOTES:
+CHART NAME: redis
+CHART VERSION: 17.8.4
+APP VERSION: 7.0.9
+** Please be patient while the chart is being deployed **
+Redis&reg; can be accessed on the following DNS names from within your cluster:
+redis-master.default.svc.cluster.local for read/write operations (port 6379)
+redis-replicas.default.svc.cluster.local for read-only operations (port 6379)
+To connect to your Redis&reg; server:
+1. Run a Redis&reg; pod that you can use as a client:
+kubectl run --namespace default redis-client --restart='Never' --image docker.io/bitnami/redis:7.0.9-debian-11-r1 --command -- sleep infinity
+Use the following command to attach to the pod:
+kubectl exec --tty -i redis-client \
+--namespace default -- bash
+2. Connect using the Redis&reg; CLI:
+redis-cli -h redis-master
+redis-cli -h redis-replicas
+To connect to your database from outside the cluster execute the following commands:
+kubectl port-forward --namespace default svc/redis-master 6379:6379 &
+redis-cli -h 127.0.0.1 -p 6379
+RKE2-doc.txt
+Displaying RKE2-doc.txt.
+
+==========
+To access all services you can use kubectl port forward command with service name
